@@ -23,7 +23,7 @@ def parse_inflect_file(inflect_file, commit_changes=False):
         'ADV': 2,
         'V': 8,
         'VPAR': 9,
-        'SUPINE' : 6,
+        'SUPINE': 6,
         'PREP': 2,
         'CONJ': 1,
         'INTERJ': 1

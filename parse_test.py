@@ -7,8 +7,8 @@ session = Connection.session
 
 
 def parse_word(word):
-
-    # Possible entries are those
+    # Possible entries are those where the stem joined to its appropriate endings
+    # create our input word.
     possible_entries = [(e, r, s) for e, r, s in session.query(Entry, Record, Stem)
         .filter(and_(Record.part_of_speech_code == Entry.part_of_speech_code,
                      Record.stem_key == Stem.stem_number))
@@ -21,17 +21,17 @@ def parse_word(word):
     # it is quicker simply to deal with each entry as a whole.
     for (entry, record, stem) in possible_entries:
         if entry.part_of_speech_code == 'N':
-            for noun_record in session.query(NounRecord)\
+            for noun_record in session.query(NounRecord) \
                     .join(NounEntry, and_(NounRecord.declension_code == NounEntry.declension_code,
                                           or_(NounRecord.variant == NounEntry.variant,
                                               NounRecord.variant == 0),
                                           or_(NounRecord.gender_code == NounEntry.gender_code,
                                               and_(NounRecord.gender_code == 'C',
                                                    NounEntry.gender_code.in_(('F', 'M'))),
-                                              NounRecord.gender_code == 'X')))\
-                    .filter(NounRecord.record_id == record.id)\
-                    .filter(Record.stem_key == stem.stem_number)\
-                    .filter(NounEntry.entry_id == entry.id)\
+                                              NounRecord.gender_code == 'X'))) \
+                    .filter(NounRecord.record_id == record.id) \
+                    .filter(Record.stem_key == stem.stem_number) \
+                    .filter(NounEntry.entry_id == entry.id) \
                     .all():
                 print('{0} - {1} Declension, {2} {3} - {4}'.format(
                     stem.stem_word + '.' + noun_record.record.ending,
@@ -40,13 +40,13 @@ def parse_word(word):
                     noun_record.number.name,
                     entry.translation))
         elif entry.part_of_speech_code == 'V':
-            for verb_record in session.query(VerbRecord)\
+            for verb_record in session.query(VerbRecord) \
                     .join(VerbEntry, and_(VerbRecord.conjugation_code == VerbEntry.conjugation_code,
                                           or_(VerbRecord.variant == VerbEntry.variant,
-                                              VerbEntry.variant == 0)))\
-                    .filter(VerbRecord.record_id == record.id)\
-                    .filter(Record.stem_key == stem.stem_number)\
-                    .filter(VerbEntry.entry_id == entry.id)\
+                                              VerbEntry.variant == 0))) \
+                    .filter(VerbRecord.record_id == record.id) \
+                    .filter(Record.stem_key == stem.stem_number) \
+                    .filter(VerbEntry.entry_id == entry.id) \
                     .all():
                 print('{0} - {1} Conjugation, {2} Person {3} - {4}'.format(
                     stem.stem_word + '.' + verb_record.record.ending,
@@ -55,13 +55,13 @@ def parse_word(word):
                     verb_record.number.name,
                     entry.translation))
         elif entry.part_of_speech_code == 'PRON':
-            for pronoun_record in session.query(PronounRecord)\
+            for pronoun_record in session.query(PronounRecord) \
                     .join(PronounEntry, and_(PronounRecord.declension_code == PronounEntry.declension_code,
                                              or_(PronounRecord.variant == PronounEntry.variant,
-                                                 PronounRecord.variant == 0)))\
-                    .filter(PronounRecord.record_id == record.id)\
-                    .filter(Record.stem_key == stem.stem_number)\
-                    .filter(PronounEntry.entry_id == entry.id)\
+                                                 PronounRecord.variant == 0))) \
+                    .filter(PronounRecord.record_id == record.id) \
+                    .filter(Record.stem_key == stem.stem_number) \
+                    .filter(PronounEntry.entry_id == entry.id) \
                     .all():
                 print('{0} - {1} Declension, {2} {3} - {4}'.format(
                     stem.stem_word + '.' + pronoun_record.record.ending,

@@ -23,7 +23,7 @@ this means that inflections with the same gender and declension.
 
 __author__ = 'Matthew Badger'
 
-from config import config
+from doll_db.config import config
 from sqlalchemy import engine_from_config, Column, Integer, String, ForeignKey, Boolean, Unicode
 from sqlalchemy.orm import relationship, backref, sessionmaker
 from sqlalchemy.ext.declarative import declarative_base, declared_attr
@@ -46,14 +46,13 @@ than the code.
 # Base table object, with id, code, name, and description columns
 class TypeBase(object):
     @declared_attr
-    def __tablename__(cls):
-        return 'type_' + cls.__name__.lower()
+    def __tablename__(self):
+        return 'type_' + self.__name__.lower()
 
     id = Column(Integer, primary_key=True)
     code = Column(String(10), unique=True)
     name = Column(String(50))
     description = Column(String(300))
-
 
 Base = declarative_base()
 

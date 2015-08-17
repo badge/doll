@@ -17,9 +17,9 @@ def parse_dict_file(dict_file, commit_changes=False):
         - Frequency
         - Source
 
-    :param dict_file:
-    :param commit_changes:
-    :return:
+    :param dict_file: The path of the DICTLINE.GEN file
+    :param commit_changes: Whether to save changes to the database
+    :return: void
     """
     
     session = Connection.session
@@ -111,7 +111,7 @@ def parse_dict_file(dict_file, commit_changes=False):
                 session.add(interjection_entry)
 
         # If we don't want to commit changes, just list the output
-        if commit_changes == False:
+        if not commit_changes:
             session.query(NounEntry).all()
             session.query(PronounEntry).all()
             session.query(PropackEntry).all()
