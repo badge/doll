@@ -23,11 +23,11 @@ this means that inflections with the same gender and declension.
 
 __author__ = 'Matthew Badger'
 
-from doll_db.config import config
-from sqlalchemy import engine_from_config, Column, Integer, String, ForeignKey, Boolean, Unicode
-from sqlalchemy.orm import relationship, backref, sessionmaker
-from sqlalchemy.ext.declarative import declarative_base, declared_attr
+from sqlalchemy import Column, Integer, String, ForeignKey, Boolean, Unicode
+from sqlalchemy.orm import relationship, backref
+from sqlalchemy.ext.declarative import declared_attr
 
+from doll.doll_db import Base
 
 """Basic Type Classes
 
@@ -53,8 +53,6 @@ class TypeBase(object):
     code = Column(String(10), unique=True)
     name = Column(String(50))
     description = Column(String(300))
-
-Base = declarative_base()
 
 
 class PartOfSpeech(TypeBase, Base):
@@ -158,6 +156,11 @@ class PronounKind(TypeBase, Base):
 
 class VerbKind(TypeBase, Base):
     """Kinds of verbs"""
+
+
+# Language, not used by Words and currently only contains English
+class Language(TypeBase, Base):
+    """Languages for translation"""
 
 
 
@@ -519,6 +522,30 @@ class Stem(Base):
     entry = relationship('Entry', backref=backref('dictionary_stem'))
 
 
+
+'''
+
+Start of a translation model, but we need groups...
+
+# Translation
+class Translation(Base):
+    """A translation of a word in a given language"""
+    __tablename__ = 'dictionary_translation'
+
+    id = Column(Integer, primary_key=True, autoincrement=True)
+
+    entry_id = Column(Integer, ForeignKey('dictionary_entry.id',
+                                          name='FK_dictionary_translation_entry_id'))
+
+    language_id = Column(Integer, ForeignKey('type_language.id',
+                                          name='FK_dictionary_translation_language_id'))
+
+    # Relationships
+    entry = relationship('Entry', backref=backref('dictionary_translation'))
+    language = relationship('Language', backref=backref('dictionary_translation'))
+'''
+
+
 # Noun Entry
 class NounEntry(Base):
     """Noun entry in the dictionary"""
@@ -717,24 +744,3 @@ class InterjectionEntry(Base):
 
     # Relationships
     entry = relationship('Entry', backref=backref('dictionary_interjection'))
-
-
-'''
-
-    Connection class
-
-    Connects to the database in the root folder of the application
-
-'''
-
-
-# Connects to the database
-class Connection:
-    __engine = engine_from_config(config, echo=False)
-
-    Base.metadata.create_all(__engine)
-
-    __Session = sessionmaker()
-    __Session.configure(bind=__engine)
-
-    session = __Session()

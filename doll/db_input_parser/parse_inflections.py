@@ -1,6 +1,6 @@
 __author__ = 'Matthew Badger'
 
-from doll_db.model import *
+from doll.doll_db import *
 
 """Parses the inflections input file.
 

@@ -1,7 +1,8 @@
 __author__ = 'Matthew Badger'
 
-from doll_db.model import *
 from sqlalchemy import func, or_, and_
+
+from doll.doll_db import *
 
 session = Connection.session
 
