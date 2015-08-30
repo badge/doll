@@ -2,9 +2,9 @@ __author__ = 'Matthew'
 
 import os
 
-from doll.db_input_parser.add_database_types import create_type_contents
-from doll.db_input_parser.parse_dictionary import parse_dict_file
-from doll.db_input_parser.parse_inflections import parse_inflect_file
+from doll.input_parser.add_database_types import create_type_contents
+from doll.input_parser.parse_dictionary import parse_dict_file
+from doll.input_parser.parse_inflections import parse_inflect_file
 
 
 def parse_all_inputs(words_folder, commit_changes):
@@ -37,4 +37,3 @@ def parse_all_inputs(words_folder, commit_changes):
     parse_inflect_file(inflect_file=words_folder + 'INFLECTS.LAT', commit_changes=commit_changes)
 
     parse_dict_file(dict_file=words_folder + 'DICTLINE.GEN', commit_changes=commit_changes)
-

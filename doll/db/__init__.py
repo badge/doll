@@ -5,8 +5,8 @@ from os.path import dirname
 from sqlalchemy import engine_from_config
 from sqlalchemy.orm import sessionmaker
 
-from doll.doll_db.config import config
-from doll.doll_db.model import *
+from doll.db.config import config
+from doll.db.model import *
 
 
 '''Connection class
@@ -19,7 +19,7 @@ from doll.doll_db.model import *
 class Connection:
     config = config
 
-    config['sqlalchemy.url'] = 'sqlite:///' + dirname(__file__) + '/doll.db'
+    config['sqlalchemy.url'] = 'sqlite:///' + dirname(__file__) + '/' + config['db_file']
 
     __engine = engine_from_config(config, echo=False)
 

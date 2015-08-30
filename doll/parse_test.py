@@ -2,7 +2,7 @@ __author__ = 'Matthew Badger'
 
 from sqlalchemy import func, or_, and_
 
-from doll.doll_db import *
+from doll.db import *
 
 session = Connection.session
 
@@ -69,6 +69,23 @@ def parse_word(word):
                     pronoun_record.declension.name,
                     pronoun_record.case.name,
                     pronoun_record.number.name,
+                    entry.translation))
+        elif entry.part_of_speech_code == 'ADJ':
+            for adjective_record in session.query(AdjectiveRecord) \
+                    .join(AdjectiveEntry, and_(AdjectiveRecord.declension_code == AdjectiveEntry.declension_code,
+                                               or_(AdjectiveRecord.variant == AdjectiveEntry.variant,
+                                                   AdjectiveRecord.variant == 0),
+                                               AdjectiveRecord.comparison_type_code == AdjectiveEntry.comparison_type_code)) \
+                    .filter(AdjectiveRecord.record_id == record.id) \
+                    .filter(Record.stem_key == stem.stem_number) \
+                    .filter(AdjectiveEntry.entry_id == entry.id) \
+                    .all():
+                print('{0} - {1} Declension, {2} {3} ({4}) - {5}'.format(
+                    stem.stem_word + '.' + adjective_record.record.ending,
+                    adjective_record.declension.name,
+                    adjective_record.case.name,
+                    adjective_record.number.name,
+                    adjective_record.comparison_type.name,
                     entry.translation))
 
 
