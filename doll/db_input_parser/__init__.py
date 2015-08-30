@@ -2,8 +2,8 @@ __author__ = 'Matthew'
 
 import os
 
-from db_input_parser.add_database_types import create_type_contents
-from db_input_parser.parse_dictionary import parse_dict_file
+from doll.db_input_parser.add_database_types import create_type_contents
+from doll.db_input_parser.parse_dictionary import parse_dict_file
 from doll.db_input_parser.parse_inflections import parse_inflect_file
 
 

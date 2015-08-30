@@ -5,8 +5,8 @@
 
 __author__ = 'Matthew Badger'
 
-from doll.doll_db import *
-
+from doll.doll_db import Connection
+from doll.doll_db.model import *
 
 # Add the basic database types
 def create_type_contents():
@@ -187,5 +187,7 @@ def create_type_contents():
     Connection.session.add(Mood(code='PPL', name='Participle', description=''))
 
     Connection.session.add(Language(code='E', name='English', description='English translations from Words'))
+
+    Connection.create_all()
 
     Connection.session.commit()

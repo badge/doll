@@ -1,6 +1,7 @@
 __author__ = 'Matthew Badger'
 
-from doll.doll_db import *
+from doll.doll_db import Connection
+from doll.doll_db.model import *
 
 def parse_dict_file(dict_file, commit_changes=False):
 

@@ -25,9 +25,11 @@ __author__ = 'Matthew Badger'
 
 from sqlalchemy import Column, Integer, String, ForeignKey, Boolean, Unicode
 from sqlalchemy.orm import relationship, backref
-from sqlalchemy.ext.declarative import declared_attr
+from sqlalchemy.ext.declarative import declarative_base, declared_attr
 
-from doll.doll_db import Base
+
+Base = declarative_base()
+
 
 """Basic Type Classes
 

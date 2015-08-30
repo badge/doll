@@ -1,12 +1,12 @@
 __author__ = 'Matthew Badger'
 
+
+from os.path import dirname
 from sqlalchemy import engine_from_config
 from sqlalchemy.orm import sessionmaker
-from sqlalchemy.ext.declarative import declarative_base
 
 from doll.doll_db.config import config
-
-Base = declarative_base()
+from doll.doll_db.model import *
 
 
 '''Connection class
@@ -17,11 +17,17 @@ Base = declarative_base()
 
 # Connects to the database
 class Connection:
-    __engine = engine_from_config(config, echo=False)
+    config = config
 
-    Base.metadata.create_all(__engine)
+    config['sqlalchemy.url'] = 'sqlite:///' + dirname(__file__) + '/doll.db'
+
+    __engine = engine_from_config(config, echo=False)
 
     __Session = sessionmaker()
     __Session.configure(bind=__engine)
 
     session = __Session()
+
+    @staticmethod
+    def create_all():
+        Base.metadata.create_all(Connection.__engine)
