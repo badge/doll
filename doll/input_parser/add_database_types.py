@@ -10,9 +10,27 @@ from doll.db.model import *
 
 # Add the basic database types
 def create_type_contents():
-    Connection.session.add(Number(code='X', name='Unknown', description=''))
-    Connection.session.add(Number(code='S', name='Singular', description=''))
-    Connection.session.add(Number(code='P', name='Plural', description=''))
+    Connection.session.add(PartOfSpeech(code='X', name='All', description='All, none, or unknown', is_real=True))
+    Connection.session.add(PartOfSpeech(code='N', name='Noun', description='Noun', is_real=True))
+    Connection.session.add(PartOfSpeech(code='PRON', name='Pronoun', description='Pronoun', is_real=True))
+    Connection.session.add(PartOfSpeech(code='ADJ', name='Adjective', description='Adjective', is_real=True))
+    Connection.session.add(PartOfSpeech(code='NUM', name='Numeral', description='Numeral', is_real=True))
+    Connection.session.add(PartOfSpeech(code='ADV', name='Adverb', description='Adverb', is_real=True))
+    Connection.session.add(PartOfSpeech(code='V', name='Verb', description='Verb', is_real=True))
+    Connection.session.add(
+        PartOfSpeech(code='VPAR', name='Verb Participle', description='Verb Participle', is_real=True))
+    Connection.session.add(PartOfSpeech(code='SUPINE', name='Supine', description='Supine', is_real=True))
+    Connection.session.add(PartOfSpeech(code='PREP', name='Preposition', description='Preposition', is_real=True))
+    Connection.session.add(PartOfSpeech(code='CONJ', name='Conjunction', description='Conjunction', is_real=True))
+    Connection.session.add(PartOfSpeech(code='INTERJ', name='Interjection', description='Interjection', is_real=True))
+    Connection.session.add(
+        PartOfSpeech(code='PACK', name='Packon', description='Packon -- artificial for code', is_real=False))
+    Connection.session.add(
+        PartOfSpeech(code='TACKON', name='Tackon', description='Tackon --  artificial for code', is_real=False))
+    Connection.session.add(
+        PartOfSpeech(code='PREFIX', name='Prefix', description='Prefix --  here artificial for code', is_real=False))
+    Connection.session.add(
+        PartOfSpeech(code='SUFFIX', name='Suffix', description='Suffix --  here artificial for code', is_real=False))
 
     Connection.session.add(
         WordAge(code='X', name='Universal', description='In use throughout the ages/unknown -- the default'))
@@ -124,6 +142,21 @@ def create_type_contents():
     Connection.session.add(WordSource(code='Y', name='', description='Temp special code'))
     Connection.session.add(WordSource(code='Z', name='', description='Sent by user --  no dictionary reference'))
 
+    Connection.session.add(Number(code='X', name='Unknown', description=''))
+    Connection.session.add(Number(code='S', name='Singular', description=''))
+    Connection.session.add(Number(code='P', name='Plural', description=''))
+
+    Connection.session.add(Declension(code=0, name='Unknown', description='', order=0))
+    Connection.session.add(Declension(code=1, name='First', description='', order=1))
+    Connection.session.add(Declension(code=2, name='Second', description='', order=2))
+    Connection.session.add(Declension(code=3, name='Third', description='', order=3))
+    Connection.session.add(Declension(code=4, name='Fourth', description='', order=4))
+    Connection.session.add(Declension(code=5, name='Fifth', description='', order=5))
+    Connection.session.add(Declension(code=6, name='Sixth', description='', order=6))
+    Connection.session.add(Declension(code=7, name='Sixth', description='', order=7))
+    Connection.session.add(Declension(code=8, name='Sixth', description='', order=8))
+    Connection.session.add(Declension(code=9, name='Sixth', description='', order=9))
+
     Connection.session.add(Gender(code='X', name='Unknown', description='All, none, or unknown'))
     Connection.session.add(Gender(code='M', name='Masculine', description=''))
     Connection.session.add(Gender(code='F', name='Feminine', description=''))
@@ -140,27 +173,16 @@ def create_type_contents():
     Connection.session.add(Case(code='ABL', name='Ablative', description='', is_default=True, uk_order=6, us_order=5))
     Connection.session.add(Case(code='LOC', name='Locative', description='', is_default=True, uk_order=7, us_order=7))
 
-    Connection.session.add(Declension(code=0, name='Unknown', description='', order=0))
-    Connection.session.add(Declension(code=1, name='First', description='', order=1))
-    Connection.session.add(Declension(code=2, name='Second', description='', order=2))
-    Connection.session.add(Declension(code=3, name='Third', description='', order=3))
-    Connection.session.add(Declension(code=4, name='Fourth', description='', order=4))
-    Connection.session.add(Declension(code=5, name='Fifth', description='', order=5))
-    Connection.session.add(Declension(code=6, name='Sixth', description='', order=6))
-    Connection.session.add(Declension(code=7, name='Sixth', description='', order=7))
-    Connection.session.add(Declension(code=8, name='Sixth', description='', order=8))
-    Connection.session.add(Declension(code=9, name='Sixth', description='', order=9))
-
-    Connection.session.add(NounKind(code='X', name='', description='unknown, nondescript'))
-    Connection.session.add(NounKind(code='S', name='', description='Singular "only"'))
-    Connection.session.add(NounKind(code='M', name='', description='plural or Multiple "only"'))
-    Connection.session.add(NounKind(code='A', name='', description='Abstract idea'))
-    Connection.session.add(NounKind(code='G', name='', description='Group/collective Name -- Roman(s)'))
-    Connection.session.add(NounKind(code='N', name='', description='proper Name'))
-    Connection.session.add(NounKind(code='P', name='', description='a Person'))
-    Connection.session.add(NounKind(code='T', name='', description='a Thing'))
-    Connection.session.add(NounKind(code='L', name='', description='Locale, name of country/city'))
-    Connection.session.add(NounKind(code='W', name='', description='a place Where'))
+    Connection.session.add(Conjugation(code=0, name='Unknown', description='', order=0))
+    Connection.session.add(Conjugation(code=1, name='First', description='', order=1))
+    Connection.session.add(Conjugation(code=2, name='Second', description='', order=2))
+    Connection.session.add(Conjugation(code=3, name='Third', description='', order=3))
+    Connection.session.add(Conjugation(code=4, name='Fourth', description='', order=4))
+    Connection.session.add(Conjugation(code=5, name='Fifth', description='', order=5))
+    Connection.session.add(Conjugation(code=6, name='Sixth', description='', order=6))
+    Connection.session.add(Conjugation(code=7, name='Sixth', description='', order=7))
+    Connection.session.add(Conjugation(code=8, name='Sixth', description='', order=8))
+    Connection.session.add(Conjugation(code=9, name='Sixth', description='', order=9))
 
     Connection.session.add(Person(code=0, name='Unknown', description='All, none, or unknown'))
     Connection.session.add(Person(code=1, name='First', description=''))
@@ -185,6 +207,56 @@ def create_type_contents():
     Connection.session.add(Mood(code='IMP', name='Imperative', description=''))
     Connection.session.add(Mood(code='INF', name='Infinitive', description=''))
     Connection.session.add(Mood(code='PPL', name='Participle', description=''))
+
+    Connection.session.add(ComparisonType(code='X', name='All', description='All, none, or unknown'))
+    Connection.session.add(ComparisonType(code='POS', name='Positive', description='Positive'))
+    Connection.session.add(ComparisonType(code='COMP', name='Comparative', description='Comparative'))
+    Connection.session.add(ComparisonType(code='SUPER', name='Superlative', description='Superlative'))
+
+    Connection.session.add(NumeralSort(code='X', name='All', description='All, none, or unknown'))
+    Connection.session.add(NumeralSort(code='CARD', name='Cardinal', description='Cardinal'))
+    Connection.session.add(NumeralSort(code='ORD', name='Ordinal', description='Ordinal'))
+    Connection.session.add(NumeralSort(code='DIST', name='Distributive', description='Distributive'))
+    Connection.session.add(NumeralSort(code='ADVERB', name='Numeral Adverb', description='Numeral Adverb'))
+
+    Connection.session.add(NounKind(code='X', name='', description='unknown, nondescript'))
+    Connection.session.add(NounKind(code='S', name='', description='Singular "only"'))
+    Connection.session.add(NounKind(code='M', name='', description='plural or Multiple "only"'))
+    Connection.session.add(NounKind(code='A', name='', description='Abstract idea'))
+    Connection.session.add(NounKind(code='G', name='', description='Group/collective Name -- Roman(s)'))
+    Connection.session.add(NounKind(code='N', name='', description='proper Name'))
+    Connection.session.add(NounKind(code='P', name='', description='a Person'))
+    Connection.session.add(NounKind(code='T', name='', description='a Thing'))
+    Connection.session.add(NounKind(code='L', name='', description='Locale, name of country/city'))
+    Connection.session.add(NounKind(code='W', name='', description='a place Where'))
+
+    Connection.session.add(PronounKind(code='X', name='Unknown', description='Unknown, nondescript'))
+    Connection.session.add(PronounKind(code='PERS', name='Personal', description='Personal'))
+    Connection.session.add(PronounKind(code='REL', name='Relative', description='Relative'))
+    Connection.session.add(PronounKind(code='REFLEX', name='Reflexive', description='Reflexive'))
+    Connection.session.add(PronounKind(code='DEMONS', name='Demonstrative', description='Demonstrative'))
+    Connection.session.add(PronounKind(code='INTERR', name='Interrogative', description='Interrogative'))
+    Connection.session.add(PronounKind(code='INDEF', name='Indefinite', description='Indefinite'))
+    Connection.session.add(PronounKind(code='ADJECT', name='Adjectival', description='Adjectival'))
+
+    Connection.session.add(VerbKind(code='X', name='All', description='All, none, or unknown'))
+    Connection.session.add(VerbKind(code='TO_BE', name='To Be (esse)', description='only the verb to be (esse)'))
+    Connection.session.add(VerbKind(code='TO_BEING', name='To Be', description='compounds of the verb to be (esse)'))
+    Connection.session.add(VerbKind(code='GEN', name='Genitive', description='verb taking the Genitive'))
+    Connection.session.add(VerbKind(code='DAT', name='Dative', description='verb taking the Dative'))
+    Connection.session.add(VerbKind(code='ABL', name='Ablative', description='verb taking the Ablative'))
+    Connection.session.add(VerbKind(code='TRANS', name='Transitive', description='Transitive verb'))
+    Connection.session.add(VerbKind(code='INTRANS', name='Intransitive', description='Intransitive verb'))
+
+    Connection.session.add(VerbKind(code='IMPERS', name='Impersonal',
+                                    description='Impersonal verb (implied subject \'it\', \'they\', \'God\') agent implied in action, subject in predicate'))
+
+    Connection.session.add(
+        VerbKind(code='DEP', name='Deponent', description='Deponent verb only passive form but with active meaning'))
+    Connection.session.add(VerbKind(code='SEMIDEP', name='Semideponent',
+                                    description='Semideponent verb (forms perfect as deponent) (perfect passive has active force)'))
+    Connection.session.add(VerbKind(code='PERFDEF', name='Perfect Definite',
+                                    description='Perfect Definite verb having only perfect stem, but with present force'))
 
     Connection.session.add(Language(code='E', name='English', description='English translations from Words'))
 

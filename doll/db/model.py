@@ -115,6 +115,11 @@ class Case(TypeBase, Base):
 class Conjugation(TypeBase, Base):
     """Conjugation"""
 
+    order = Column(Integer)
+
+    def __lt__(self, other):
+        return self.order < other.order
+
 
 class Person(TypeBase, Base):
     """Person - First, Second or Third"""
