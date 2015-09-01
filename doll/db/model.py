@@ -510,6 +510,7 @@ class Entry(Base):
     source = relationship('WordSource', backref=backref('dictionary_entry'))
 
     stems = relationship('Stem', backref=backref('dictionary_stem'))
+    translation_sets = relationship('TranslationSet', backref=backref('dictionary_translation_set'))
 
 
 # Stem of a dictionary entry
@@ -529,10 +530,28 @@ class Stem(Base):
     entry = relationship('Entry', backref=backref('dictionary_stem'))
 
 
+# Set of translations
+class TranslationSet(Base):
+    """A set of related translations"""
+    __tablename__ = 'dictionary_translation_set'
 
-'''
+    id = Column(Integer, primary_key=True, autoincrement=True)
 
-Start of a translation model, but we need groups...
+    entry_id = Column(Integer, ForeignKey('dictionary_entry.id',
+                                          name='FK_dictionary_translation_set_entry_id'))
+    language_id = Column(Integer, ForeignKey('type_language.id',
+                                             name='FK_dictionary_translation_set_language_id'))
+    area_code = Column(String(10), ForeignKey('type_wordarea.code',
+                                              name='FK_dictionary_translation_set_wordarea_code'))
+
+    # Relationships
+    entry = relationship('Entry', backref=backref('dictionary_translation_set'))
+    language = relationship('Language', backref=backref('dictionary_translation_set'))
+    area = relationship('WordArea', backref=backref('dictionary_translation_set'))
+
+    translations = relationship('Translation', backref=backref('dictionary_translation'))
+
+
 
 # Translation
 class Translation(Base):
@@ -541,16 +560,13 @@ class Translation(Base):
 
     id = Column(Integer, primary_key=True, autoincrement=True)
 
-    entry_id = Column(Integer, ForeignKey('dictionary_entry.id',
-                                          name='FK_dictionary_translation_entry_id'))
-
-    language_id = Column(Integer, ForeignKey('type_language.id',
-                                          name='FK_dictionary_translation_language_id'))
+    translation_set_id = Column(Integer, ForeignKey('dictionary_translation_set.id',
+                                                    name='FK_dictionary_translation_translation_set_id'))
+    translation = Column(Unicode(4096, collation='BINARY'))
 
     # Relationships
-    entry = relationship('Entry', backref=backref('dictionary_translation'))
-    language = relationship('Language', backref=backref('dictionary_translation'))
-'''
+    translation_set = relationship('TranslationSet', backref=backref('dictionary_translation'))
+
 
 
 # Noun Entry

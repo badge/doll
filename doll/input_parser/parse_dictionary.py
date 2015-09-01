@@ -2,6 +2,31 @@ __author__ = 'Matthew Badger'
 
 from doll.db import Connection
 from doll.db.model import *
+import re
+
+
+def parse_translation(session, language, entry, translation):
+    """Parses the translation line and creates the Translation and TranslationSet objects"""
+
+    for ts in [ts for ts in map(str.strip, translation.split(';')) if len(ts) > 0]:
+
+        # Check if the translation set includes an area
+        area_regex = re.match('\s([A-Z]):', ts)
+        if area_regex is not None:
+            area = session.query(WordArea).filter(WordArea.code == area_regex.group(0)).first()
+            translation_set = TranslationSet(entry=entry,
+                                             area=area,
+                                             language=language)
+        else:
+            translation_set = TranslationSet(entry=entry,
+                                             language=language)
+
+        session.add(translation_set)
+
+        for t in [t for t in map(str.strip, ts.split(',')) if len(t) > 0]:
+            session.add(Translation(translation_set=translation_set,
+                                    translation=t))
+
 
 def parse_dict_file(dict_file, commit_changes=False):
 
@@ -44,6 +69,8 @@ def parse_dict_file(dict_file, commit_changes=False):
 
             translation = line[110:].strip()
 
+            language = session.query(Language).filter(Language.code == 'E').first()
+
             # Create the list of stems, ignoring those that are empty or zzz
             stems = [Stem(stem_number=i, stem_word=s) for i, s in enumerate(stem_list, 1) if len(s) > 0 and s != 'zzz']
 
@@ -56,6 +83,11 @@ def parse_dict_file(dict_file, commit_changes=False):
                           source_code=source_code,
                           translation=translation,
                           stems=stems)
+
+            parse_translation(session=session,
+                              language=language,
+                              entry=entry,
+                              translation=translation)
 
             # Create the specific entry given the part of speech
             if entry.part_of_speech_code == 'N':
