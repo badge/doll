@@ -1,35 +1,67 @@
-__author__ = 'Matthew Badger'
-
 from doll.db import Connection
 from doll.db.model import *
 import re
+from tqdm import tqdm
 
 
-def parse_translation(session, language, entry, translation):
-    """Parses the translation line and creates the Translation and TranslationSet objects"""
+class Parser:
+    _regex = re.compile('\s([A-Z]):')
 
-    for ts in [ts for ts in map(str.strip, translation.split(';')) if len(ts) > 0]:
+    def __init__(self, session):
+        self.session = session
+        self._word_areas = {word_area.code: word_area for word_area in session.query(WordArea).all()}
 
-        # Check if the translation set includes an area
-        area_regex = re.match('\s([A-Z]):', ts)
-        if area_regex is not None:
-            area = session.query(WordArea).filter(WordArea.code == area_regex.group(0)).first()
-            translation_set = TranslationSet(entry=entry,
-                                             area=area,
-                                             language=language)
+    def parse_translation(self, language, entry, translation):
+        """Parses the translation line and creates the Translation and TranslationSet objects
+
+        :param language
+        :param entry
+        :param translation
+        """
+
+        for ts in [ts for ts in map(str.strip, translation.split(';')) if len(ts) > 0]:
+
+            # Check if the translation set includes an area
+            area_regex = __class__._regex.match(ts)
+            if area_regex is not None:
+                area = self._word_areas[area_regex.group(0)]
+                translation_set = TranslationSet(entry=entry,
+                                                 area=area,
+                                                 language=language)
+            else:
+                translation_set = TranslationSet(entry=entry,
+                                                 language=language)
+
+            self.session.add(translation_set)
+
+            for t in [t for t in map(str.strip, ts.split(',')) if len(t) > 0]:
+                self.session.add(Translation(translation_set=translation_set, translation=t))
+
+    @staticmethod
+    def verb_real_conjugation(present_stem: str, conjugation_code: str, variant: int) -> int:
+        """Calculates the 'real' conjugation of a verb from its present stem, conjugation
+        code, and variant number
+
+        :param present_stem
+        :param conjugation_code
+        :param variant
+        """
+
+        cc = int(conjugation_code)
+
+        if cc in [1, 2]:  # First and second are the same
+            return conjugation_code
+        elif (cc, variant) == (3, 4):  # Third conjugation, fourth variant is actually fourth
+            return 4
+        elif cc == 3 and present_stem[-1:] == 'i':  # Third -io
+            return 5
+        elif cc == 3:  # Other third conjugation verbs
+            return 3
         else:
-            translation_set = TranslationSet(entry=entry,
-                                             language=language)
-
-        session.add(translation_set)
-
-        for t in [t for t in map(str.strip, ts.split(',')) if len(t) > 0]:
-            session.add(Translation(translation_set=translation_set,
-                                    translation=t))
+            return cc + 1
 
 
-def parse_dict_file(dict_file, commit_changes=False):
-
+def parse_dict_file(dict_file: str, commit_changes: bool = False):
     """Parses a given dictionary file.
 
     The DICTLINE.GEN file is arranged in rows as follows:
@@ -50,29 +82,32 @@ def parse_dict_file(dict_file, commit_changes=False):
     
     session = Connection.session
 
+    parser = Parser(session=session)
+
+    language = session.query(Language).filter(Language.code == 'E').first()
+
+    print('Parsing dictionary file')
+
     # Open the dictionary file and loop over its lines
-    with open(dict_file) as f:
-        for line in f:
-            stem_list = [line[:18].strip(),
-                         line[19:37].strip(),
-                         line[38:56].strip(),
-                         line[57:75].strip()]
+    with open(dict_file, encoding='windows_1252') as f:
+        # Start by counting the lines in the file
+        line_count = sum(1 for line in f)
+        f.seek(0)
 
-            part_of_speech_code = line[76:82].strip()
-            part_of_speech_data = line[83:99].strip().split()
-
-            age_code = line[100:101].strip()
-            area_code = line[102:103].strip()
-            location_code = line[104:105].strip()
-            frequency_code = line[106:107].strip()
-            source_code = line[108:109].strip()
-
-            translation = line[110:].strip()
-
-            language = session.query(Language).filter(Language.code == 'E').first()
+        for line in tqdm(f, total=line_count):
 
             # Create the list of stems, ignoring those that are empty or zzz
-            stems = [Stem(stem_number=i, stem_word=s) for i, s in enumerate(stem_list, 1) if len(s) > 0 and s != 'zzz']
+            stems = [Stem(stem_number=i, stem_word=s, stem_simple_word=s)
+                     for i, s in enumerate([line[i:i + 18].strip() for i in range(0, 58, 19)], 1)
+                     if len(s) > 0 and s != 'zzz']
+
+            part_of_speech_code, part_of_speech_data = line[76:82].strip(), [p.strip()
+                                                                             for p in line[83:99].split()]
+
+            # Split 100:101, ..., 108:109
+            age_code, area_code, location_code, frequency_code, source_code = [line[i]
+                                                                               for i in range(100, 109, 2)]
+            translation = line[110:].strip()
 
             # Create the basic entry, i.e. everything except the part of speech data
             entry = Entry(part_of_speech_code=part_of_speech_code,
@@ -84,10 +119,9 @@ def parse_dict_file(dict_file, commit_changes=False):
                           translation=translation,
                           stems=stems)
 
-            parse_translation(session=session,
-                              language=language,
-                              entry=entry,
-                              translation=translation)
+            parser.parse_translation(language=language,
+                                     entry=entry,
+                                     translation=translation)
 
             # Create the specific entry given the part of speech
             if entry.part_of_speech_code == 'N':
@@ -131,6 +165,9 @@ def parse_dict_file(dict_file, commit_changes=False):
                                        variant=int(part_of_speech_data[1]),
                                        verb_kind_code=part_of_speech_data[2],
                                        entry=entry)
+                verb_entry.realconjugation_code = Parser.verb_real_conjugation(stems[0].stem_word,
+                                                                               verb_entry.conjugation_code,
+                                                                               verb_entry.variant)
                 session.add(verb_entry)
             elif entry.part_of_speech_code == 'PREP':
                 preposition_entry = PrepositionEntry(case_code=part_of_speech_data[0],
@@ -156,4 +193,5 @@ def parse_dict_file(dict_file, commit_changes=False):
             session.query(ConjunctionEntry).all()
             session.query(InterjectionEntry).all()
         else:
+            print('Committing changes to database')
             session.commit()

@@ -21,11 +21,11 @@ this means that inflections with the same gender and declension.
         
 """
 
-__author__ = 'Matthew Badger'
-
 from sqlalchemy import Column, Integer, String, ForeignKey, Boolean, Unicode
 from sqlalchemy.orm import relationship, backref
 from sqlalchemy.ext.declarative import declarative_base, declared_attr
+
+__author__ = 'Matthew Badger'
 
 
 Base = declarative_base()
@@ -38,7 +38,7 @@ such as PartOfSpeech (noun, verb, etc.) and Mood. They have a base class
 TypeBase, which defines an id, code, name and description.
 
 Most of the type classes define no other columns. The code matches that
-in Whitaker's source, and has a unique key. id is just for backrefernces
+in Whitaker's source, and has a unique key. id is just for back-references
 by sqlalchemy. name is hopefully a better thing to present to the user
 than the code.
 
@@ -50,6 +50,9 @@ class TypeBase(object):
     @declared_attr
     def __tablename__(self):
         return 'type_' + self.__name__.lower()
+
+    def __repr__(self):
+        return "{0}\t{1}\t{2} - {3}".format(self.id, self.code, self.name, self.description)
 
     id = Column(Integer, primary_key=True)
     code = Column(String(10), unique=True)
@@ -121,6 +124,16 @@ class Conjugation(TypeBase, Base):
         return self.order < other.order
 
 
+class RealConjugation(TypeBase, Base):
+    """Real conjugation, which is a bit of a misnomer because
+    it's only a bit more real than Conjugation"""
+
+    order = Column(Integer)
+
+    def __lt__(self, other):
+        return self.order < other.order
+
+
 class Person(TypeBase, Base):
     """Person - First, Second or Third"""
 
@@ -170,7 +183,6 @@ class Language(TypeBase, Base):
     """Languages for translation"""
 
 
-
 """Inflection Record Classes.
 
 These classes define the inflection records, built from
@@ -202,7 +214,8 @@ class Record(Base):
 
     # Other columns
     stem_key = Column(Integer)
-    ending = Column(Unicode(20, collation='BINARY'))  # We use binary collation so a is not ā
+    ending = Column(Unicode(20, collation='BINARY'))  # We use binary collation so macrons are different
+    simple_ending = Column(Unicode(20))
     notes = Column(Unicode(200, collation='BINARY'))
 
     # Relationships
@@ -524,7 +537,8 @@ class Stem(Base):
                                           name='FK_dictionary_stem_entry_id'))
 
     stem_number = Column(Integer)
-    stem_word = Column(Unicode(20, collation='BINARY'))  # We use binary collation so a is not ā
+    stem_word = Column(Unicode(20, collation='BINARY'))  # We use binary collation so macrons are different
+    stem_simple_word = Column(Unicode(20))
 
     # Relationships
     entry = relationship('Entry', backref=backref('dictionary_stem'))
@@ -552,7 +566,6 @@ class TranslationSet(Base):
     translations = relationship('Translation', backref=backref('dictionary_translation'))
 
 
-
 # Translation
 class Translation(Base):
     """A translation of a word in a given language"""
@@ -566,7 +579,6 @@ class Translation(Base):
 
     # Relationships
     translation_set = relationship('TranslationSet', backref=backref('dictionary_translation'))
-
 
 
 # Noun Entry
@@ -713,6 +725,9 @@ class VerbEntry(Base):
 
     conjugation_code = Column(String(10), ForeignKey('type_conjugation.code',
                                                      name='FK_dictionary_verb_conjugation_code'))
+
+    realconjugation_code = Column(String(10), ForeignKey('type_realconjugation.code',
+                                                         name='FK_dictionary_verb_realconjugation_code'))
     variant = Column(Integer)
 
     verb_kind_code = Column(String(10), ForeignKey('type_verbkind.code',

@@ -1,7 +1,6 @@
-__author__ = 'Matthew Badger'
-
 from doll.db import Connection
 from doll.db.model import *
+from tqdm import tqdm
 
 """Parses the inflections input file.
 
@@ -30,9 +29,15 @@ def parse_inflect_file(inflect_file, commit_changes=False):
         'INTERJ': 1
     }
 
+    print('Parsing inflections file')
+
     # Open the inflections file and loop over its lines
-    with open(inflect_file) as f:
-        for line in f:
+    with open(inflect_file, encoding='windows_1252') as f:
+        # Start by counting the lines in the file
+        line_count = sum(1 for line in f)
+        f.seek(0)
+
+        for line in tqdm(f, total=line_count):
             line_split = line.split()
             if len(line_split) > 0 and line_split[0][0] != '-':
                 i = line_start[line_split[0]]

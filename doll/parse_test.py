@@ -1,21 +1,48 @@
-__author__ = 'Matthew Badger'
-
 from sqlalchemy import func, or_, and_
-
 from doll.db import *
+from enum import Enum
+import argparse
+import unicodedata
+import string
+from sqlalchemy.sql.functions import ReturnTypeFromArgs
+
+
+class unaccent(ReturnTypeFromArgs):
+    pass
 
 session = Connection.session
 
 
-def parse_word(word):
+class ParseOption(Enum):
+    strict = 1,
+    non_strict = 2
+
+
+current_mode = ParseOption.non_strict
+
+
+def remove_accents(data):
+    return ''.join(x for x in unicodedata.normalize('NFKD', data) if x in string.ascii_letters).lower()
+
+
+def parse_word(word: str, current_mode: ParseOption = current_mode):
     # Possible entries are those where the stem joined to its appropriate endings
     # create our input word.
-    possible_entries = [(e, r, s) for e, r, s in session.query(Entry, Record, Stem)
-        .filter(and_(Record.part_of_speech_code == Entry.part_of_speech_code,
-                     Record.stem_key == Stem.stem_number))
-        .filter(Stem.entry_id == Entry.id)
-        .filter(func.substr(word, 1, func.length(Stem.stem_word)) == Stem.stem_word)
-        .filter(Stem.stem_word + Record.ending == word)]
+
+    if current_mode == ParseOption.non_strict:
+        possible_entries = [(e, r, s) for e, r, s in session.query(Entry, Record, Stem)
+            .filter(and_(Record.part_of_speech_code == Entry.part_of_speech_code,
+                         Record.stem_key == Stem.stem_number))
+            .filter(Stem.entry_id == Entry.id)
+            .filter(func.substr(word, 1, func.length(Stem.stem_word)) == Stem.stem_word)
+            .filter(Stem.stem_word + Record.ending == word)]
+    else:
+        possible_entries = [(e, r, s) for e, r, s in session.query(Entry, Record, Stem)
+            .filter(and_(Record.part_of_speech_code == Entry.part_of_speech_code,
+                         Record.stem_key == Stem.stem_number))
+            .filter(Stem.entry_id == Entry.id)
+            .filter(func.substr(word, 1, func.length(Stem.stem_word)) == Stem.stem_word)
+            .filter(unaccent(Stem.stem_word) + unaccent(Record.ending) == unaccent(word))]
 
     # It would be preferable to get a list of possible records based on
     # the possible entries, then filter further by word type, however
@@ -89,9 +116,19 @@ def parse_word(word):
                     entry.translation))
 
 
-print('Welcome to Words!')
-while True:
-    word = input('Enter a word to parse or type quit() to exit:\n')
-    if word == 'quit()':
-        break
-    parse_word(word)
+if __name__ == '__main__':
+
+    parser = argparse.ArgumentParser(description='An implementation of William Whitaker''s Words in Python')
+    parser.add_argument("-ns", "--nonstrict", action='store_true')
+    args = parser.parse_args()
+
+    print('Welcome to Words!')
+
+    if args.nonstrict:
+        current_mode = ParseOption.non_strict
+
+    while True:
+        word = input('Enter a word to parse or type quit() to exit:\n')
+        if word == 'quit()':
+            break
+        parse_word(word)

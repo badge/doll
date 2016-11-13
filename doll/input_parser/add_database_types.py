@@ -184,6 +184,17 @@ def create_type_contents():
     Connection.session.add(Conjugation(code=8, name='Sixth', description='', order=8))
     Connection.session.add(Conjugation(code=9, name='Sixth', description='', order=9))
 
+    Connection.session.add(RealConjugation(code=0, name='Unknown', description='', order=0))
+    Connection.session.add(RealConjugation(code=1, name='First', description='', order=1))
+    Connection.session.add(RealConjugation(code=2, name='Second', description='', order=2))
+    Connection.session.add(RealConjugation(code=3, name='Third', description='', order=3))
+    Connection.session.add(RealConjugation(code=4, name='Fourth', description='', order=5))
+    Connection.session.add(RealConjugation(code=5, name='Third -io', description='', order=4))
+    Connection.session.add(RealConjugation(code=6, name='Esse', description='', order=6))
+    Connection.session.add(RealConjugation(code=7, name='Eo', description='', order=7))
+    Connection.session.add(RealConjugation(code=8, name='Irregular', description='', order=8))
+    Connection.session.add(RealConjugation(code=9, name='Other', description='', order=9))
+
     Connection.session.add(Person(code=0, name='Unknown', description='All, none, or unknown'))
     Connection.session.add(Person(code=1, name='First', description=''))
     Connection.session.add(Person(code=2, name='Second', description=''))
